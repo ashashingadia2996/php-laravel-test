@@ -45,6 +45,10 @@ class Kernel extends HttpKernel
         ],
     ];
 
+    protected $routeMiddleware = [
+        'checkAccessToken' => \App\Http\Middleware\CheckAccessToken::class
+    ];
+
     /**
      * The application's middleware aliases.
      *
