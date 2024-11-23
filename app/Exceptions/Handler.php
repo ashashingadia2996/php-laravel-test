@@ -3,6 +3,8 @@
 namespace App\Exceptions;
 
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Throwable;
 
 class Handler extends ExceptionHandler
@@ -23,8 +25,34 @@ class Handler extends ExceptionHandler
      */
     public function register(): void
     {
-        $this->reportable(function (Throwable $e) {
+        $this->reportable(function (Throwable $exception) {
             //
         });
+    }
+
+    /**
+     * Render an exception into an HTTP response.
+     */
+    public function render($request, Throwable $exception)
+    {
+        // Handle "Route Not Found" exceptions
+        if ($exception instanceof NotFoundHttpException) {
+            return response()->json([
+                'success' => false,
+                'message' => 'The requested endpoint does not exist. Please check the URL and try again.',
+            ], 404);
+        }
+
+        // Handle "Method Not Allowed" exceptions
+        if ($exception instanceof MethodNotAllowedHttpException) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Method not allowed. Please use the correct HTTP method for this endpoint.',
+                'allowed_methods' => explode(', ', $exception->getHeaders()['Allow'] ?? 'N/A'),
+            ], 405);
+        }
+
+        // For other exceptions, fallback to the default behavior
+        return parent::render($request, $exception);
     }
 }
