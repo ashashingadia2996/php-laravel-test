@@ -4,9 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Access;
 use App\Models\Device;
-use App\Models\User;
 use Illuminate\Http\Request;
-
+use \Illuminate\Database\Eloquent\ModelNotFoundException;
 class DeviceController extends Controller
 {
     public function getDeviceInfo($id)
@@ -20,7 +19,7 @@ class DeviceController extends Controller
                 'data' => $device
             ], 200);
 
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+        } catch (ModelNotFoundException $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Device not found'
@@ -41,7 +40,6 @@ class DeviceController extends Controller
             ], 400);
         }
 
-        // Fetch the access records for the user (this will give us the device IDs the user has access to)
         $accessRecords = Access::where('user_id', $userId)->get();
 
         // Check if access records exist
